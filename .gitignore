@@ -1,0 +1,11 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+.vs/
+#.vs/ExchangeRatesApi
+#/ExchangeRatesApi/ExchangeRatesApi/bin/Debug/net8.0
+#/ExchangeRatesApi/ExchangeRatesApi/obj
+#/ExchangeRatesApi/ExchangeRatesApi/ExchangeRatesApi.csproj.user
+#/ExchangeRatesApi/ExchangeRatesApi/appsettings.Development.json
+#/ExchangeRatesApi/ExchangeRatesApi/appsettings.Development.json
