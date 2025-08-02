@@ -1,0 +1,77 @@
+ 
+<div class="container" *ngIf="initialized">
+  <form [formGroup]="form" (ngSubmit)="onCalculate()">
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>API</mat-label>
+      <mat-select formControlName="api" (selectionChange)="loadCurrencies()">
+        <mat-option *ngFor="let api of apiOptions" [value]="api.code">{{ api.name }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Waluta źródłowa</mat-label>
+      <mat-select formControlName="sourceCurrency" required>
+        <mat-option *ngFor="let curr of currencies" [value]="curr.code">
+          {{ curr.code }} - {{ curr.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Waluta docelowa</mat-label>
+      <mat-select formControlName="targetCurrency" required>
+        <mat-option *ngFor="let curr of currencies" [value]="curr.code">
+          {{ curr.code }} - {{ curr.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="date-picker">
+      <mat-label>Data od</mat-label>
+      <input matInput [matDatepicker]="pickerFrom" formControlName="dateFrom">
+      <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+      <mat-datepicker #pickerFrom></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="date-picker">
+      <mat-label>Data do</mat-label>
+      <input matInput [matDatepicker]="pickerTo" formControlName="dateTo">
+      <mat-datepicker-toggle matSuffix [for]="pickerTo"></mat-datepicker-toggle>
+      <mat-datepicker #pickerTo></mat-datepicker>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" type="submit">Przelicz</button>
+  </form>
+
+  <div *ngIf="!showNoData">
+    <div class="results" >
+      <h3>Statystyki</h3>
+      <p>Minimalny kurs: {{ minRate | number:'1.4-4' }}</p>
+      <p>Maksymalny kurs: {{ maxRate | number:'1.4-4' }}</p>
+      <p>Średni kurs: {{ avgRate | number:'1.4-4' }}</p>
+    </div>
+
+    <div class="table-container" >
+      <h3>Tabela kursów</h3>
+      <table mat-table [dataSource]="tableData" class="mat-elevation-z8">
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef> Data </th>
+          <td mat-cell *matCellDef="let element"> {{ element.date }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="rate">
+          <th mat-header-cell *matHeaderCellDef> Kurs ({{ form.get('sourceCurrency')?.value }} - {{form.get('targetCurrency')?.value  }}) </th>
+          <td mat-cell *matCellDef="let element"> {{ element.rate | number:'1.4-4'}} </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="['date', 'rate']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['date', 'rate']"></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="resultsNoData" *ngIf="showNoData">
+    <h3>Brak danych</h3>
+  </div>
+
+</div>
