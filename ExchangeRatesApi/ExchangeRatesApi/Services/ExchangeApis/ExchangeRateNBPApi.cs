@@ -1,6 +1,8 @@
 ﻿
 using ExchangeRatesApi.Data.Models;
 using ExchangeRatesApi.DTOs;
+using ExchangeRatesApi.Services.Interfaces;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
 
@@ -9,10 +11,13 @@ namespace ExchangeRatesApi.Services.ExchangeApis
     internal class ExchangeRateNBPApi : IExchangeRateApi
     {
         private readonly HttpClient _httpClient;
-        private readonly List<string> tableApi = new List<string>() { "A", "B", "C" };
+        private readonly ICacheService _dailyCacheService;
+        private readonly List<string> tableApi = new List<string>() { "A", "B" };
+        private readonly string currencyListCacheKey = "CurrencyListNBP";
 
-        public ExchangeRateNBPApi(ExchangeRateApiType exchangeApiType, HttpClient httpClient)
+        public ExchangeRateNBPApi(ExchangeRateApiType exchangeApiType, HttpClient httpClient, ICacheService dailyCacheService)
         {
+            _dailyCacheService = dailyCacheService;
             _httpClient = httpClient;
             _httpClient.BaseAddress = new Uri(exchangeApiType.Url);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -20,15 +25,27 @@ namespace ExchangeRatesApi.Services.ExchangeApis
 
         public async Task<List<Currency>> GetCurrencyList(CancellationToken cancellationToken)
         {
-            var currencyList = new List<Currency>();
+            var currencyCacheList = _dailyCacheService.GetData<List<Currency>>(currencyListCacheKey);
+            if (currencyCacheList is not null)
+            {
+                return currencyCacheList;
+            }
 
+            var currencyList = new List<Currency>();
             foreach (var table in tableApi)
             {
                 string endpoint = $"api/exchangerates/tables/{table}/";
-                var response = await _httpClient.GetAsync(endpoint, cancellationToken);
-                response.EnsureSuccessStatusCode();
-
-                var json = await response.Content.ReadAsStringAsync();
+                var json = "";
+                try 
+                {     
+                    var response = await _httpClient.GetAsync(endpoint, cancellationToken);
+                    response.EnsureSuccessStatusCode();
+                    json = await response.Content.ReadAsStringAsync();
+                }
+                catch (HttpRequestException e) when(e.StatusCode == System.Net.HttpStatusCode.NotFound || e.StatusCode == System.Net.HttpStatusCode.NoContent)
+                {
+                    return currencyList;
+                }
 
                 var tables = JsonConvert.DeserializeObject<List<ApiExchangeRatesTable>>(json);
 
@@ -45,22 +62,30 @@ namespace ExchangeRatesApi.Services.ExchangeApis
                     }
                 }
             };
+
+            _dailyCacheService.AddData(currencyListCacheKey, currencyList);
             return currencyList;
         }
 
         public async Task<List<RateForDate>> GetMidRatesForDateList(string currencyCode, DateTime dateFrom, DateTime dateTo, CancellationToken cancellationToken)
         {
-            //TODO
             var currencyTable = await GetTableForCurrencyAsync(currencyCode, cancellationToken);
             string endpoint = $"api/exchangerates/rates/{currencyTable}/{currencyCode}/{FormatRequestDate(dateFrom)}/{FormatRequestDate(dateTo)}/";
-            var response = await _httpClient.GetAsync(endpoint, cancellationToken);
-            response.EnsureSuccessStatusCode();
-
-            var json = await response.Content.ReadAsStringAsync();
-
-            var rateTable = JsonConvert.DeserializeObject<ApiExchangeRatesForCurrency>(json);
 
             var rateForDayList = new List<RateForDate>();
+            string json = "";
+            try
+            {
+                var response = await _httpClient.GetAsync(endpoint, cancellationToken);
+                response.EnsureSuccessStatusCode();
+                json = await response.Content.ReadAsStringAsync();
+            }
+            catch (HttpRequestException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound || e.StatusCode == System.Net.HttpStatusCode.NoContent)
+            {
+                return rateForDayList;
+            }
+                
+            var rateTable = JsonConvert.DeserializeObject<ApiExchangeRatesForCurrency>(json);
             if (rateTable is null)
                 return rateForDayList;
 

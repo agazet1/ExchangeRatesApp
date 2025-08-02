@@ -11,7 +11,7 @@ namespace ExchangeRatesApi.DTOs
         public decimal MinRate { get; set; }
         public decimal MaxRate { get; set; }
         public decimal AvgRate { get; set; }
-        public List<RateForDateDto> RateList;
+        public List<RateForDateDto> RateList { get; set; }
     }
 
     public class RateForDate

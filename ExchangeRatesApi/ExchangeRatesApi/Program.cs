@@ -6,63 +6,64 @@ using ExchangeRatesApi.Services.Interfaces;
 using NLog.Web;
 
 
-var builder = WebApplication.CreateBuilder(args);
+    var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+    builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
-var angularOriginName = "AngularOrigin";
-var angularOrigin = builder.Configuration.GetValue<string>("FrontAppUrl")
-        ?? throw new InvalidOperationException("Connection string"
-        + "'FrontAppUrl' not found.");
+    var angularOriginName = "AngularOrigin";
+    var angularOrigin = builder.Configuration.GetValue<string>("FrontAppUrl")
+            ?? throw new InvalidOperationException("Connection string"
+            + "'FrontAppUrl' not found.");
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(angularOriginName,
-        builder =>
-        {
-            builder.WithOrigins(angularOrigin)
-                   .AllowAnyHeader()
-                   .AllowAnyMethod()
-                   .AllowCredentials();
-                   
-        });
-});
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy(angularOriginName,
+            builder =>
+            {
+                builder.WithOrigins(angularOrigin)
+                       .AllowAnyHeader()
+                       .AllowAnyMethod()
+                       .AllowCredentials();
 
-builder.Logging.ClearProviders();
-builder.Host.UseNLog();
+            });
+    });
 
-builder.Services.AddHttpClient();
+    builder.Logging.ClearProviders();
+    builder.Host.UseNLog();
 
-// Add services to the container.
-builder.Services.AddControllers();
+    builder.Services.AddHttpClient();
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+    // Add services to the container.
+    builder.Services.AddControllers();
 
-builder.Services.Configure<AppConfiguration>(builder.Configuration.GetSection("AppConfiguration"));
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<IAppConfigurationService, AppConfigurationService>();
-builder.Services.AddScoped<IExchangeRateService, ExchangeRateService>();
-builder.Services.AddScoped<IExchangeRateApiAdapter, ExchangeRateApiAdapter>();
-builder.Services.AddScoped<IExchangeRateApiFactory, ExchangeRateApiFactory>();
+    builder.Services.Configure<AppConfiguration>(builder.Configuration.GetSection("AppConfiguration"));
 
-var app = builder.Build();
+    builder.Services.AddSingleton<IAppConfigurationService, AppConfigurationService>();
+    builder.Services.AddSingleton<ICacheService, DailyCacheService>();
+    builder.Services.AddScoped<IExchangeRateService, ExchangeRateService>();
+    builder.Services.AddScoped<IExchangeRateApiAdapter, ExchangeRateApiAdapter>();
+    builder.Services.AddScoped<IExchangeRateApiFactory, ExchangeRateApiFactory>();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-app.UseMiddleware<RequestResponseLoggingMiddleware>();
+    var app = builder.Build();
 
-app.UseHttpsRedirection();
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+    app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
-app.UseCors(angularOriginName);
+    app.UseHttpsRedirection();
 
-app.UseAuthorization();
+    app.UseCors(angularOriginName);
 
-app.MapControllers();
+    app.UseAuthorization();
 
-app.Run();
+    app.MapControllers();
+
+    app.Run();
 

@@ -5,6 +5,8 @@ VisualStudioVersion = 17.14.36310.24
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExchangeRatesApi", "ExchangeRatesApi\ExchangeRatesApi.csproj", "{DE7E42E0-E9E0-46AA-8B9C-B0D789ADDB8A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExchangeRatesApi.Tests", "ExchangeRatesApi.Tests\ExchangeRatesApi.Tests.csproj", "{7F330A44-08EC-2765-3A5E-B2C0AC8A91D4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{DE7E42E0-E9E0-46AA-8B9C-B0D789ADDB8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE7E42E0-E9E0-46AA-8B9C-B0D789ADDB8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE7E42E0-E9E0-46AA-8B9C-B0D789ADDB8A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F330A44-08EC-2765-3A5E-B2C0AC8A91D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F330A44-08EC-2765-3A5E-B2C0AC8A91D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F330A44-08EC-2765-3A5E-B2C0AC8A91D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F330A44-08EC-2765-3A5E-B2C0AC8A91D4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

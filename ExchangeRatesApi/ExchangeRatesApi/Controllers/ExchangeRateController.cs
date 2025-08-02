@@ -1,8 +1,10 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Mvc;
-using ExchangeRatesApi.Features.ExchangeRate.Query;
-using ExchangeRatesApi.Data.Models;
+﻿using ExchangeRatesApi.Data.Models;
 using ExchangeRatesApi.DTOs;
+using ExchangeRatesApi.Exceptions;
+using ExchangeRatesApi.Features.ExchangeRate.Query;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace ExchangeRatesApi.Controllers
 {
@@ -18,29 +20,84 @@ namespace ExchangeRatesApi.Controllers
         }
 
         [HttpGet]
-        public Task<List<Currency>> GetCurrencyList(string apiCode, DateTime date, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<ActionResult<List<CurrencyDto>>> GetCurrencyList(string apiCode, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return _mediator.Send(new GetCurrencyList(apiCode), cancellationToken);
+            try
+            {
+                var response = await _mediator.Send(new GetCurrencyList(apiCode), cancellationToken);
+
+                if (response == null || response.Count == 0)
+                {
+                    return NoContent();
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex) when (ex is ValidationException || ex is BadRequestException)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpGet]
-        public Task<List<ExchangeRateApiType>> GetExchangeRateApiList(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<ActionResult<List<ExchangeRateApiTypeDto>>> GetExchangeRateApiList(CancellationToken cancellationToken = default(CancellationToken))
         {
-            return _mediator.Send(new GetExchangeRateApiList(), cancellationToken);
+            try
+            {
+                var response = await _mediator.Send(new GetExchangeRateApiList(), cancellationToken);
+
+                if (response == null || response.Count == 0)
+                {
+                    return NoContent();
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex) when (ex is ValidationException || ex is BadRequestException)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpGet]
-        public Task<CurrencyRateResponseDto> CalculateCurrencyRate(
+        public async Task<ActionResult<CurrencyRateResponseDto>> CalculateCurrencyRate(
             string apiCode, string sourceCurrency, string targetCurrency, DateTime DateFrom, DateTime DateTo, CancellationToken cancellationToken)
         {
-            return _mediator.Send(
-                new CalculateCurrencyRate() {
-                    ApiCode = apiCode,
-                    SourceCurrency = sourceCurrency, 
-                    TargetCurrency = targetCurrency,
-                    DateFrom = DateFrom,
-                    DateTo = DateTo
-            }, cancellationToken);
+            try
+            {
+                var response = await _mediator.Send(
+                    new CalculateCurrencyRate()
+                    {
+                        ApiCode = apiCode,
+                        SourceCurrency = sourceCurrency,
+                        TargetCurrency = targetCurrency,
+                        DateFrom = DateFrom,
+                        DateTo = DateTo
+                    }, cancellationToken);
+
+                if (response == null || response.RateList is null || response.RateList.Count == 0)
+                {
+                    return NoContent();
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex) when (ex is ValidationException || ex is BadRequestException )
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }

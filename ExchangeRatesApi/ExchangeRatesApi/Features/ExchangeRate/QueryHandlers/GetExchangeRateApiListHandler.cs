@@ -2,10 +2,11 @@
 using ExchangeRatesApi.Features.ExchangeRate.Query;
 using ExchangeRatesApi.Data.Models;
 using ExchangeRatesApi.Services.Interfaces;
+using ExchangeRatesApi.DTOs;
 
 namespace ExchangeRatesApi.Features.ExchangeRate.QueryHandlers
 {
-    internal class GetExchangeRateApiListHandler : IRequestHandler<GetExchangeRateApiList, List<ExchangeRateApiType>>
+    internal class GetExchangeRateApiListHandler : IRequestHandler<GetExchangeRateApiList, List<ExchangeRateApiTypeDto>>
     {
         private readonly IAppConfigurationService _appConfigService;
 
@@ -14,9 +15,13 @@ namespace ExchangeRatesApi.Features.ExchangeRate.QueryHandlers
             _appConfigService = appConfigService;
         }
 
-        public Task<List<ExchangeRateApiType>> Handle(GetExchangeRateApiList request, CancellationToken cancellationToken)
+        public Task<List<ExchangeRateApiTypeDto>> Handle(GetExchangeRateApiList request, CancellationToken cancellationToken)
         {
-            return Task.FromResult(_appConfigService.GetExchangeRateApiList());
+            var result = _appConfigService.GetExchangeRateApiList();
+            List<ExchangeRateApiTypeDto> apiList = new List<ExchangeRateApiTypeDto>();
+            result.ForEach(x => apiList.Add(new ExchangeRateApiTypeDto() { Code = x.Code, Name = x.Name }));
+
+            return Task.FromResult(apiList);
         }
     }
 }

@@ -52,11 +52,15 @@ internal class ExchangeRateService : IExchangeRateService
     public async Task<CurrencyRateResponseDto> CalculateCurrencyRate(ExchangeRateApiType exchangeRateApiType, string sourceCurrencyCode, string targetCurrencyCode, DateTime dateFrom, DateTime dateTo, CancellationToken cancellationToken)
     {
         string dateFormat = _appConfigService.GetDateFormat();
-        //take rate from day...
-        var midRatesSourceCurrency = await _apiAdapter.GetExchangeRatesForDatesList(exchangeRateApiType, sourceCurrencyCode, dateFrom, dateTo, cancellationToken);
 
-        //take rate from day...
+        var midRatesSourceCurrency = await _apiAdapter.GetExchangeRatesForDatesList(exchangeRateApiType, sourceCurrencyCode, dateFrom, dateTo, cancellationToken);
         var midRatesTargetCurrency = await _apiAdapter.GetExchangeRatesForDatesList(exchangeRateApiType, targetCurrencyCode, dateFrom, dateTo, cancellationToken);
+
+        if(midRatesSourceCurrency == null || midRatesTargetCurrency == null ||
+            midRatesSourceCurrency.Count == 0 || midRatesTargetCurrency.Count == 0)
+        {
+            return null;
+        }
 
         CurrencyRateResponseDto rate = new CurrencyRateResponseDto();
         rate.SourceCurrencyCode = sourceCurrencyCode;
@@ -71,10 +75,11 @@ internal class ExchangeRateService : IExchangeRateService
             var rate1 = midRatesSourceCurrency.FirstOrDefault(x => x.Date == date);
             if (rate1 is null)
                 continue;
-            var rate2 = midRatesTargetCurrency.First(x => x.Date == date);
+            var rate2 = midRatesTargetCurrency.FirstOrDefault(x => x.Date == date);
+            if (rate2 is null)
+                continue;
 
             var currencyRateFrom2To = rate1.Rate / rate2.Rate; // e.g. 1 USD = 1.3684 GBP (rate)
-
             rateList.Add(new RateForDateDto() { Date = date.ToString(dateFormat), Rate = currencyRateFrom2To });
         }
 
