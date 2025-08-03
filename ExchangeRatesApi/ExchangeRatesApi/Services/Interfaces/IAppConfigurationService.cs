@@ -2,7 +2,7 @@
 
 namespace ExchangeRatesApi.Services.Interfaces
 {
-    internal interface IAppConfigurationService
+    public interface IAppConfigurationService
     {
         AppConfiguration GetAppConfigurations();
         List<ExchangeRateApiType> GetExchangeRateApiList();

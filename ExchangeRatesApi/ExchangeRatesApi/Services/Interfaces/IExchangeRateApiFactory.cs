@@ -2,7 +2,7 @@
 
 namespace ExchangeRatesApi.Services
 {
-    internal interface IExchangeRateApiFactory
+    public interface IExchangeRateApiFactory
     {
         IExchangeRateApi GetApi(ExchangeRateApiType? exchangeApiType);
     }

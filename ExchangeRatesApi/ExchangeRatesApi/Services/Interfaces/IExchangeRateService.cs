@@ -1,7 +1,7 @@
 ﻿using ExchangeRatesApi.Data.Models;
 using ExchangeRatesApi.DTOs;
 
-internal interface IExchangeRateService
+public interface IExchangeRateService
 {
     Task<List<Currency>> GetCurrencyList(ExchangeRateApiType exchangeRateApiType, CancellationToken cancellationToken);
     ExchangeRateApiType GetApiType(string apiCode);

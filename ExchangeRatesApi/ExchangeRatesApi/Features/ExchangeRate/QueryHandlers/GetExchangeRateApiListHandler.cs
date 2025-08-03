@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using ExchangeRatesApi.Features.ExchangeRate.Query;
-using ExchangeRatesApi.Data.Models;
 using ExchangeRatesApi.Services.Interfaces;
 using ExchangeRatesApi.DTOs;
 

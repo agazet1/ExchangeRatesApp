@@ -1,5 +1,4 @@
-﻿using ExchangeRatesApi.Data.Models;
-using ExchangeRatesApi.DTOs;
+﻿using ExchangeRatesApi.DTOs;
 using ExchangeRatesApi.Exceptions;
 using ExchangeRatesApi.Features.ExchangeRate.Query;
 using MediatR;
@@ -46,8 +45,8 @@ namespace ExchangeRatesApi.Controllers
         [HttpGet]
         public async Task<ActionResult<List<ExchangeRateApiTypeDto>>> GetExchangeRateApiList(CancellationToken cancellationToken = default(CancellationToken))
         {
-            try
-            {
+            try 
+            { 
                 var response = await _mediator.Send(new GetExchangeRateApiList(), cancellationToken);
 
                 if (response == null || response.Count == 0)
@@ -63,7 +62,7 @@ namespace ExchangeRatesApi.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                 return StatusCode(500, ex.Message);
             }
         }
 

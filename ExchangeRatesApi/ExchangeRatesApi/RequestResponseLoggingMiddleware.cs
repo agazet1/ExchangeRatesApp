@@ -20,7 +20,7 @@ namespace ExchangeRatesApi
                 var requestBody = await new StreamReader(context.Request.Body).ReadToEndAsync();
                 context.Request.Body.Position = 0;
 
-                Logger.Info($"Request: {context.Request.Method} {context.Request.Path} Body: {requestBody}");
+                Logger.Info($"Request: {context.Request.Method} {context.Request.Path}{context.Request.QueryString} Body: {requestBody}");
             }
             catch (Exception ex)
             {

@@ -1,11 +1,18 @@
 using ExchangeRatesApi;
-using ExchangeRatesApi.Data;
 using ExchangeRatesApi.Data.Models;
 using ExchangeRatesApi.Services;
 using ExchangeRatesApi.Services.Interfaces;
+using NLog;
 using NLog.Web;
 
 
+var logger = LogManager
+    .Setup()
+    .LoadConfigurationFromFile("NLog.config")
+    .GetCurrentClassLogger();
+
+try
+{
     var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
@@ -55,6 +62,7 @@ using NLog.Web;
         app.UseSwagger();
         app.UseSwaggerUI();
     }
+
     app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
     app.UseHttpsRedirection();
@@ -67,3 +75,13 @@ using NLog.Web;
 
     app.Run();
 
+}
+catch (Exception ex)
+{
+    logger.Fatal(ex);
+    throw;
+}
+finally
+{
+    LogManager.Shutdown();
+}
